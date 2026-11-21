@@ -5,7 +5,8 @@
 > that was done to set up this codespace so that a fresh codespace / AI agent
 > can pick up the full context immediately without re-explaining the task.
 >
-> Read this file first. Also see `README-REPO-CONTEXT.md` (git history of the
+> Read this file first. Then read `README-MENTAL-MODEL.md` (the design/why —
+> **essential context**). Also see `README-REPO-CONTEXT.md` (git history of the
 > upstream practicals repo) and `README-PYTHON-PRACTICALS.md` (the original
 > Python project README, preserved verbatim).
 

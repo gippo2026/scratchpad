@@ -1,0 +1,163 @@
+# Mental Model — How This Environment Is Organized
+
+> This document explains **why** everything is where it is, so an AI agent can
+> reason about new tasks instead of replaying steps mechanically. For the exact
+> chronological steps, see `README.md`; for upstream history, see
+> `README-REPO-CONTEXT.md`.
+
+---
+
+## 1. The one-sentence model
+
+**`main` is an immutable, generic codespace template; everything task-specific
+lives in separate branches (coursework, docs) or outside git entirely (runtimes,
+deployed web files).**
+
+The repo `/workspaces/uni-practicals` (`https://github.com/fg65hg67/uni-practicals.git`)
+is the *template*. The practicals and the setup log are *payloads* carried on
+other branches of that same repo. The running machine is *state* that the
+template plus payloads produce.
+
+---
+
+## 2. The three planes
+
+Keep these separate in your head — confusing them is the main source of mistakes.
+
+| Plane | What it is | Where it lives | Committed? |
+| --- | --- | --- | --- |
+| **Code / identity** | The repo and its branches | `git` objects, pushed to GitHub | Yes |
+| **Toolchain / machine state** | Runtimes, LSPs, shell config, venv | `$HOME`, apt, mise, Mason | **No** — recreated by post-create / setup docs |
+| **Workload / deployed files** | What Apache actually serves | `/var/www/html` | **No** — it's a deployment target |
+
+Key consequence: the PHP files are **both** committed on `html-practicals`
+(source of truth) **and** copied into `/var/www/html` (runtime location). Editing
+one does not edit the other. The Python project is committed on `py-practical`
+and checked out at the workspace root — there it *is* the same files.
+
+---
+
+## 3. Branch topology and ownership
+
+```
+main                  (generic baseline — DO NOT COMMIT TO THIS)
+│                       .devcontainer/devcontainer.json
+│                       .devcontainer/post-create.sh
+│
+├── env-setup-log     (agent context — documentation only)
+│                       README.md                 ← start here
+│                       README-MENTAL-MODEL.md    ← this file
+│                       README-REPO-CONTEXT.md
+│                       README-PYTHON-PRACTICALS.md
+│
+├── py-practical      (Python coursework)
+│                       assignment1/, assignment2/, pyproject.toml,
+│                       uv.lock, uv.toml, show_plot.py, data, DEV_ENV.md
+│
+└── html-practicals   (PHP/HTML/CSS coursework)
+                        assignment1/ … assignment4/, composer.json,
+                        .phpactor.json, .php-cs-fixer.dist.php
+```
+
+These are **orphan branches**: they share no history with `main` and with each
+other. That is deliberate — each branch is an independent payload that can be
+checked out without dragging the others along.
+
+### Routing rule for any new file
+
+1. Is it generic devcontainer/tooling config for *every* codespace? → `main`.
+2. Is it documentation/context for the agent? → `env-setup-log` (README files only).
+3. Is it Python coursework? → `py-practical`.
+4. Is it PHP/HTML/CSS coursework? → `html-practicals`.
+5. Is it machine state (venv, caches, installed tools, `/var/www/html`)? → **not in git**.
+
+---
+
+## 4. The runtime stack (bottom-up)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ WORKLOADS                                                   │
+│  Apache → /var/www/html  (PHP assignments, localhost)        │
+│  Python project → workspace root + .venv (uv)               │
+├─────────────────────────────────────────────────────────────┤
+│ LANGUAGE TOOLING                                            │
+│  Neovim/LazyVim: jdtls, pyright+ruff, phpactor + DAP/test   │
+│  Runtimes: Java 25, Python 3.13, PHP 8.4, Node, Composer    │
+├─────────────────────────────────────────────────────────────┤
+│ BASE (from .devcontainer/post-create.sh on main)            │
+│  mise activation, zsh plugins, zoxide, LazyVim starter,     │
+│  global toolchain, skip-worktree protection                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Layer 1 is automated by the repo. Layers 2–3 were set up manually in this
+codespace and are recorded in `README.md`; they are *not* automated and *not*
+committed to `main` (by design — `main` must stay generic).
+
+---
+
+## 5. Why things are where they are
+
+- **Why is PHP served from `/var/www/html`, not the repo?** Apache's docroot is
+  `/var/www/html`. The repo is a git workspace under `/workspaces`, not a web
+  root. The upstream repo even has commits that first symlinked, then decided
+  to serve files directly from the docroot — see `README-REPO-CONTEXT.md`.
+- **Why is the Python project at the workspace root instead of a subfolder?**
+  `pyproject.toml`, `uv.lock`, and `pyright`/`ruff` config all assume the project
+  root is the working directory (`.venv`, `src = ["."]`, `import show_plot`
+  from anywhere). Flattening it makes `uv run ...` work without path juggling.
+- **Why isn't `.venv` committed?** It is machine-specific and large; `.gitignore`
+  excludes it. `uv sync` regenerates it from `uv.lock`.
+- **Why is the handoff context on a branch instead of `main`?** Because the user
+  explicitly wants the generic baseline clean — no project-specific commits in
+  the template. A new codespace must therefore be created from the
+  `env-setup-log` branch, or the agent must be told to read that branch.
+- **Why are there no systemd services?** This is a devcontainer; `service ...`
+  is the only way to start Apache, and nothing auto-starts after recreation.
+- **Why an Aliyun PyPI mirror?** `pypi.org` is unreachable from this environment;
+  `uv.toml` in the Python project pins the working mirror.
+
+---
+
+## 6. Invariants — do not break these
+
+1. **Never commit to `main`** unless it is a genuinely generic template change
+   the user asked for. Keep its two-file tree intact.
+2. **Keep `env-setup-log` README-only.** Don't mix practical files into it.
+3. **Don't confuse source with deployment.** Changing `html-practicals` requires
+   re-deploying to `/var/www/html`; changing `py-practical` requires `uv sync`
+   only if dependencies changed.
+4. **Java must stay ≥ 21 for jdtls** (we use 25). Downgrading breaks Java LSP
+   with exit code 13.
+5. **Python debugging comes from apt** (`python3-debugpy` + `debugpy-adapter`
+   wrapper), not Mason, because PyPI is unreachable.
+6. **Apache must be started manually after container recreation.**
+7. **Prefer `uv run ...`** for Python commands — it always picks the project venv.
+
+---
+
+## 7. How to approach a new task
+
+1. Read `README.md` (steps/state) and this file (design).
+2. Identify which **plane** the task touches: git branch, machine state, or
+   deployment.
+3. Pick the **branch** using the routing rule in §3; never default to `main`.
+4. If the task changes a deployed artifact, re-deploy it (copy to
+   `/var/www/html` / re-run `uv sync`) and **verify with a real command**
+   (`curl`, `uv run ruff check .`, headless nvim LSP check).
+5. Push the branch; leave `main` untouched.
+
+---
+
+## 8. Failure modes and their meaning
+
+| Symptom | Likely cause |
+| --- | --- |
+| `jdtls` exits 13 | Java older than 21 — reinstall Java 25 via mise |
+| Mason `debugpy` empty venv / pip timeouts | PyPI blocked — use apt debugpy + wrapper |
+| `Cannot find any fd binary` | `fd-find` missing → symlink `/usr/local/bin/fd` |
+| Apache FQDN warning | `ServerName localhost` conf missing/disabled |
+| Blank PHP page | Check GET params / Apache error log; PHP itself works |
+| `python` resolves to 3.13 but not venv packages | Use `uv run python ...` (or select `.venv` via venv-selector in nvim) |
+| New codespace lacks the setup log | It was created from `main`; use `env-setup-log` instead |
