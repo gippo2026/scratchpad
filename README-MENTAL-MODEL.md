@@ -143,6 +143,9 @@ committed to `main` (by design — `main` must stay generic).
 9. **Motions:** `vim.opt.startofline = true` in `options.lua`, so `gg`, `G`,
    `H/M/L`, `CTRL-D/U/F/B` land on the first non-blank of the destination line
    instead of keeping the previous column (Neovim default is off; `:h 'sol'`).
+10. **Wrapping:** `vim.opt.wrap = true` globally in `options.lua`; LazyVim only
+    turned it on for text/markdown filetypes. `linebreak` is already on, so
+    wraps happen at word boundaries (`:h 'wrap'`, `:h 'linebreak'`).
 
 ---
 
