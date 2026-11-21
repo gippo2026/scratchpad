@@ -1,0 +1,84 @@
+<html>
+  <head>
+    <title>Time-Table</title>
+    <style>
+      body {
+        background-color: whitesmoke;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+      }
+      table {
+        border: 4px solid navy;
+        margin: 25px auto;
+        width: 90%;
+      }
+      th {
+        background-color: navy;
+        color: white;
+        font-size: 17px;
+        padding: 8px;
+        border: 1px solid black;
+      }
+      td {
+        font-size: 15px;
+        color: maroon;
+        padding: 8px;
+        border: 1px solid black;
+        text-align: center;
+      }
+      .dayname {
+        background-color: lightblue;
+        font-weight: bold;
+      }
+      .break {
+        background-color: gold;
+        font-style: italic;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <table border="1">
+      <tr>
+        <th colspan="5">Time-Table</th>
+      </tr>
+      <tr>
+        <th>Day</th>
+        <th>8:00 - 9:30</th>
+        <th>9:30 - 11:00</th>
+        <th>11:00 - 11:15</th>
+        <th>11:15 - 12:45</th>
+      </tr>
+      <tr>
+        <td class="dayname">Monday</td>
+        <td>Web Technologies I</td>
+        <td class="lab">Web Technologies Lab</td>
+        <td class="break" rowspan="5">Break</td>
+        <td>Databases</td>
+      </tr>
+      <tr>
+        <td class="dayname">Tuesday</td>
+        <td>Opps</td>
+        <td>databases</td>
+        <td>Mathematics</td>
+      </tr>
+      <tr>
+        <td class="dayname">Wednesday</td>
+        <td>Databases</td>
+        <td>web Technologies I</td>
+        <td>Opps</td>
+      </tr>
+      <tr>
+        <td class="dayname">Thursday</td>
+        <td>Mathematics</td>
+        <td>Opps</td>
+        <td>web Technologies I</td>
+      </tr>
+      <tr>
+        <td class="dayname">Friday</td>
+        <td>Opps</td>
+        <td>Mathematics</td>
+        <td>web Technologies I</td>
+      </tr>
+    </table>
+  </body>
+</html>
