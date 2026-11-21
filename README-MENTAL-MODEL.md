@@ -33,7 +33,7 @@ Keep these separate in your head — confusing them is the main source of mistak
 Key consequence: the PHP files are **both** committed on `html-practicals`
 (source of truth) **and** copied into `/var/www/html` (runtime location). Editing
 one does not edit the other. The Python project is committed on `py-practical`
-and checked out at the workspace root — there it *is* the same files.
+and checked out in `python-practicals/` at the workspace root — there it *is* the same files.
 
 ---
 
@@ -79,7 +79,7 @@ checked out without dragging the others along.
 ┌─────────────────────────────────────────────────────────────┐
 │ WORKLOADS                                                   │
 │  Apache → /var/www/html  (PHP assignments, localhost)        │
-│  Python project → workspace root + .venv (uv)               │
+│  Python project → python-practicals/ + .venv (uv)           │
 ├─────────────────────────────────────────────────────────────┤
 │ LANGUAGE TOOLING                                            │
 │  Neovim/LazyVim: jdtls, pyright+ruff, phpactor + DAP/test   │
@@ -103,10 +103,10 @@ committed to `main` (by design — `main` must stay generic).
   `/var/www/html`. The repo is a git workspace under `/workspaces`, not a web
   root. The upstream repo even has commits that first symlinked, then decided
   to serve files directly from the docroot — see `README-REPO-CONTEXT.md`.
-- **Why is the Python project at the workspace root instead of a subfolder?**
-  `pyproject.toml`, `uv.lock`, and `pyright`/`ruff` config all assume the project
-  root is the working directory (`.venv`, `src = ["."]`, `import show_plot`
-  from anywhere). Flattening it makes `uv run ...` work without path juggling.
+- **Why is the Python project in its own `python-practicals/` folder?** It keeps
+  the Python tooling (`pyproject.toml`, `uv.lock`, `.venv`, `pyright`/`ruff`
+  config, `import show_plot`) self-contained and separate from the generic repo
+  configs on `main`. Run `uv sync` / `uv run ...` from inside that folder.
 - **Why isn't `.venv` committed?** It is machine-specific and large; `.gitignore`
   excludes it. `uv sync` regenerates it from `uv.lock`.
 - **Why is the handoff context on a branch instead of `main`?** Because the user

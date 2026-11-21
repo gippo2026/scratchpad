@@ -61,7 +61,7 @@ deliberately reverted to a generic baseline.
   environment") — Python assignments (`assignment1/setA/q1..q8.py`,
   `setB/q1..q7.py`, `assignment2/setA/q1..q5.py`), `heightweight.csv`,
   `show_plot.py`, `pyproject.toml`, `uv.lock`, `uv.toml` and `DEV_ENV.md`.
-  **This is the content deployed to the workspace root.**
+  **This is the content deployed to `python-practicals/` at the workspace root.**
 
 ## 3. Key historical setup commits (and why they matter)
 

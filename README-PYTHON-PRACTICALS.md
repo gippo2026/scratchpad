@@ -15,7 +15,6 @@ venv via `venv-selector` (`<leader>usv` / `:VenvSelect`).
 ---
 
 > Note (added by the environment-setup documentation branch): this file is a
-> verbatim copy of the Python project README that was at the workspace root
-> when the `env-setup-log` branch was created. The setup handoff document is
-> `README.md` in this branch; `README.md` at the workspace root now contains
-> that handoff log, so this copy preserves the original project README.
+> verbatim copy of the Python project README from the `py-practical` branch,
+> whose project now lives in `python-practicals/` at the workspace root. The
+> setup handoff document is `README.md` on this `env-setup-log` branch.

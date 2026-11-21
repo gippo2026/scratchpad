@@ -39,7 +39,7 @@
 | Path | Contents |
 | --- | --- |
 | `/var/www/html/` | PHP/HTML/CSS practicals, **flattened**: `assignment1/` … `assignment4/`, plus `composer.json`, `.phpactor.json`, `.php-cs-fixer.dist.php`. Served by Apache at `http://localhost/...`. |
-| `/workspaces/uni-practicals/` | **Python practicals** at the workspace root: `assignment1/`, `assignment2/`, `pyproject.toml`, `uv.lock`, `uv.toml`, `show_plot.py`, `heightweight.csv`, `DEV_ENV.md`, `.venv/`. |
+| `/workspaces/uni-practicals/python-practicals/` | **Python practicals** project: `assignment1/`, `assignment2/`, `pyproject.toml`, `uv.lock`, `uv.toml`, `show_plot.py`, `heightweight.csv`, `DEV_ENV.md`, `.venv/`. |
 | `~/.config/nvim/` | LazyVim config: `lazyvim.json`, `lua/plugins/languages.lua`, `lua/config/options.lua`. |
 | `~/.config/mise/config.toml` | Global mise toolchain (node, opencode, neovim, btop, zoxide, java, python, uv). |
 
@@ -116,11 +116,11 @@ behaviour and Java requirements.
     (`curl 'http://localhost/assignment2/setAq1.php?num1=7&num2=3&op=1'` →
     `Mod = 1`).
 
-### Phase 4 — Python project in the workspace root
-16. Exported the `py-practical` branch with
-    `git archive py-practical | tar -x -C /workspaces/uni-practicals/`
-    (flattened — no nested wrapper directory).
-17. Ran `uv sync` in `/workspaces/uni-practicals/` → created `.venv` and
+### Phase 4 — Python project
+16. Exported the `py-practical` branch and later moved the whole Python project
+    into `python-practicals/` at the workspace root (the only top-level dir in
+    that branch).
+17. Ran `uv sync` in `/workspaces/uni-practicals/python-practicals/` → created `.venv` and
     installed 14 packages from `uv.lock` via the Aliyun mirror:
     matplotlib 3.11.2, numpy 2.5.5, pandas 3.1.1, ruff 0.17.6, editable
     `show_plot`, plus dependencies.
@@ -161,8 +161,8 @@ sudo service apache2 status                # running
 curl http://localhost/                     # HTTP 200
 curl 'http://localhost/assignment2/setAq1.php?num1=7&num2=3&op=1'
 
-# Python (workspace root is the project)
-cd /workspaces/uni-practicals
+# Python (project lives in python-practicals/)
+cd /workspaces/uni-practicals/python-practicals
 uv sync                                    # repair venv from uv.lock + mirror
 uv run python path/to/script.py
 uv run ruff check .
