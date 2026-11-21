@@ -134,6 +134,12 @@ committed to `main` (by design — `main` must stay generic).
    wrapper), not Mason, because PyPI is unreachable.
 6. **Apache must be started manually after container recreation.**
 7. **Prefer `uv run ...`** for Python commands — it always picks the project venv.
+8. **Clipboard:** `~/.config/nvim/lua/config/options.lua` sets
+   `vim.opt.clipboard = "unnamedplus"` and forces `vim.g.clipboard = "osc52"`
+   when there is no X/Wayland display (this container has none, so OSC 52 is
+   the only working "system clipboard"). LazyVim temporarily clears the option
+   at startup and restores it on `VeryLazy` — a headless check before that
+   event will misleadingly show an empty `clipboard`.
 
 ---
 
