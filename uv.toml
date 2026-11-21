@@ -1,0 +1,4 @@
+# PyPI is unreachable from this codespace; use the Aliyun mirror instead.
+[[index]]
+url = "https://mirrors.aliyun.com/pypi/simple/"
+default = true

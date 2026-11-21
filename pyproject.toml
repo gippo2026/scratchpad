@@ -1,0 +1,44 @@
+[project]
+name = "python-practical"
+version = "0.1.0"
+description = "Python practical assignments (Set A / Set B)"
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.5",
+    "pandas>=3.1.1",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.17"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Flat module at the project root: importable as `show_plot` from anywhere.
+py-modules = ["show_plot"]
+
+[tool.pyright]
+# Analyze every Python file under the project root; no per-assignment lists.
+include = ["**/*.py"]
+exclude = [".venv", "**/__pycache__"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.13"
+
+[tool.ruff]
+line-length = 88
+src = ["."]
+
+[tool.ruff.lint]
+# F401: `import show_plot` is always intentional (it patches plt.show), so
+#       scripts never need a per-line `# noqa: F401`.
+# RUF100: tracked baseline files carry noqa comments for non-Ruff linters.
+ignore = ["F401", "RUF100"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tracked baseline scripts use an older import order. Apply to the whole
+# baseline tree via a pattern, not to individual files.
+"assignment1/**/*.py" = ["I001"]
