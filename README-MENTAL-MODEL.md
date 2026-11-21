@@ -140,6 +140,9 @@ committed to `main` (by design — `main` must stay generic).
    the only working "system clipboard"). LazyVim temporarily clears the option
    at startup and restores it on `VeryLazy` — a headless check before that
    event will misleadingly show an empty `clipboard`.
+9. **Motions:** `vim.opt.startofline = true` in `options.lua`, so `gg`, `G`,
+   `H/M/L`, `CTRL-D/U/F/B` land on the first non-blank of the destination line
+   instead of keeping the previous column (Neovim default is off; `:h 'sol'`).
 
 ---
 
