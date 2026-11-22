@@ -1,40 +1,34 @@
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, Normalizer, Binarizer
-
-# Q1
-
-wineData = pd.read_csv("../../winequality-red.csv", sep=";")
-
-# q2
-
-print(
-    "Minmax Scaled: \n",
-    pd.DataFrame(
-        MinMaxScaler().fit_transform(wineData), columns=wineData.columns
-    ).head(),
+from sklearn.preprocessing import (
+    Binarizer,
+    MinMaxScaler,
+    Normalizer,
+    StandardScaler,
 )
 
-# q3
+# Q1. Import the local winequality-red.csv (saved from the UCI link)
+wine = pd.read_csv("../../winequality-red.csv", sep=";")
 
+# Q2. Rescaling using MinMaxScaler
 print(
-    "\nStandardized : \n",
-    pd.DataFrame(
-        StandardScaler().fit_transform(wineData), columns=wineData.columns
-    ).head(),
+    "MinMax scaled (0 to 1):\n",
+    pd.DataFrame(MinMaxScaler().fit_transform(wine), columns=wine.columns).head(),
 )
 
-# q4
-
+# Q3. Standardizing - mean 0 and standard deviation 1
 print(
-    "\nNormalized: \n",
-    pd.DataFrame(Normalizer().fit_transform(wineData), columns=wineData.columns).head(),
+    "Standardized (mean 0, std 1):\n",
+    pd.DataFrame(StandardScaler().fit_transform(wine), columns=wine.columns).head(),
 )
 
-# q5
-
+# Q4. Normalizing - rescale each observation to unit norm using Normalizer
 print(
-    "\nBinarized: \n",
-    pd.DataFrame(
-        Binarizer(threshold=5).fit_transform(wineData), columns=wineData.columns
-    ).head(),
+    "Normalized to unit norm:\n",
+    pd.DataFrame(Normalizer().transform(wine), columns=wine.columns).head(),
+)
+
+# Q5. Binarizing using Binarizer (threshold)
+print(
+    "Binarized (threshold 5):\n",
+    pd.DataFrame(Binarizer(threshold=5).transform(wine), columns=wine.columns).head(),
 )

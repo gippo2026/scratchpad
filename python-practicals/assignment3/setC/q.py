@@ -1,15 +1,12 @@
 import pandas as pd
 
-# q1
+# Q1. Import libraries and load dataset into a pandas dataframe
+stu = pd.read_csv("../../student_bucketing.csv").rename(columns={"marks": "Marks"})
 
-studentData = pd.read_csv("../../student_bucketing.csv")
+# Q2. Display first five rows
+print("First five rows:\n", stu.head())
 
-# q2
-
-print("First 5 records: \n", studentData.head())
-
-# q3
-
+# Q3. Discretize marks into 5 buckets using cut() and display top 10 rows
 labels = ["Poor", "Below_average", "Average", "Above_average", "Excellent"]
-studentData["grade"] = pd.cut(studentData["marks"], bins=5, labels=labels)
-print("\nTop 10 rows with grade bucket:\n", studentData.head(10))
+stu["grade"] = pd.cut(stu["Marks"], bins=5, labels=labels)
+print("Top 10 rows with 'grade' buckets:\n", stu.head(10))
