@@ -117,6 +117,12 @@ committed to `main` (by design — `main` must stay generic).
   is the only way to start Apache, and nothing auto-starts after recreation.
 - **Why an Aliyun PyPI mirror?** `pypi.org` is unreachable from this environment;
   `uv.toml` in the Python project pins the working mirror.
+- **Why is the plot viewer an extension instead of just `code --goto`?** The CLI
+  opens a foreground tab and steals focus from the maximized terminal. The
+  manual `local.showplot-bg` extension opens PNGs with `preserveFocus: true`
+  (background) and `preview: false` (pinned, so every plot of a multi-plot
+  script stays in a tab). It is machine state like `.venv` — never in git; see
+  `README.md` §5.
 
 ---
 
@@ -146,6 +152,13 @@ committed to `main` (by design — `main` must stay generic).
 10. **Wrapping:** `vim.opt.wrap = true` globally in `options.lua`; LazyVim only
     turned it on for text/markdown filetypes. `linebreak` is already on, so
     wraps happen at word boundaries (`:h 'wrap'`, `:h 'linebreak'`).
+11. **Headless plots:** `show_plot.py` patches `plt.show` and hands PNG paths to
+    `local.showplot-bg` via `/tmp/show_plot_request.txt` (atomic write). The
+    extension must use `preview: false` — preview tabs are replaced, so
+    `preview: true` shows only the **last** plot. Keep `preserveFocus: true` so
+    the terminal keeps focus. After editing extension JS, reload the VS Code
+    window; the extension/source/VSIX are machine state in `~` and `/tmp`,
+    never committed.
 
 ---
 
@@ -173,3 +186,6 @@ committed to `main` (by design — `main` must stay generic).
 | Blank PHP page | Check GET params / Apache error log; PHP itself works |
 | `python` resolves to 3.13 but not venv packages | Use `uv run python ...` (or select `.venv` via venv-selector in nvim) |
 | New codespace lacks the setup log | It was created from `main`; use `env-setup-log` instead |
+| Only the last plot appears for a multi-plot script | Extension uses `preview: true`; set `preview: false` + reload window (§5 of `README.md`) |
+| Plots save but no tab opens | `local.showplot-bg` missing/not loaded — reinstall from `/tmp/showplot-bg.vsix` and reload window |
+| Some plots missing on rapid `plt.show()` calls | Request file written non-atomically; use temp file + `os.replace` in `show_plot.py` |

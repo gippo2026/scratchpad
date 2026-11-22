@@ -42,6 +42,7 @@
 | `/workspaces/uni-practicals/python-practicals/` | **Python practicals** project: `assignment1/`, `assignment2/`, `pyproject.toml`, `uv.lock`, `uv.toml`, `show_plot.py`, `heightweight.csv`, `DEV_ENV.md`, `.venv/`. |
 | `~/.config/nvim/` | LazyVim config: `lazyvim.json`, `lua/plugins/languages.lua`, `lua/config/options.lua`. |
 | `~/.config/mise/config.toml` | Global mise toolchain (node, opencode, neovim, btop, zoxide, java, python, uv). |
+| `~/.vscode-remote/extensions/local.showplot-bg-0.0.1/` | Manual VS Code extension for headless plots; source/VSIX in `/tmp/showplot-bg/` and `/tmp/showplot-bg.vsix`. See §5. |
 
 The cloned `practical-exams/` directory no longer exists.
 
@@ -150,6 +151,8 @@ behaviour and Java requirements.
 | `fd` missing (Snacks/venv-selector error on Python buffers) | apt `fd-find` + `sudo ln -s /usr/bin/fdfind /usr/local/bin/fd`. |
 | Apache warning "Could not reliably determine the server's FQDN" | `echo 'ServerName localhost' > /etc/apache2/conf-available/servername.conf` + `a2enconf servername`. |
 | Ruff "Error while resolving settings from workspace" during a test | Caused by a malformed temporary test `pyproject.toml` (NUL bytes); the real project file is fine — `uv run ruff check .` passes. |
+| Only the last PNG of a multi-plot script appeared in VS Code | The `local.showplot-bg` extension used `preview: true`; preview tabs are **replaced and reused** by the next preview. Set `preview: false` (pinned tabs), keep `preserveFocus: true`, then **Developer: Reload Window**. |
+| Rapid `plt.show()` calls lost plots / opened duplicate tabs | `show_plot.py` now writes `/tmp/show_plot_request.txt` atomically (temp file + `os.replace`) instead of truncate-then-write, so the extension's `fs.watch` reads exactly one complete request per plot. |
 
 ---
 
@@ -168,6 +171,12 @@ uv run python path/to/script.py
 uv run ruff check .
 .venv/bin/python --version
 
+# Headless plots (PNG + background VS Code tabs) — see §5
+# import show_plot at the top of the script, then call plt.show() as usual
+SHOW_PLOT_OPEN=cli uv run python path/to/script.py   # use code --goto instead
+SHOW_PLOT_DISABLE=1 uv run python path/to/script.py  # save only, don't open
+# After changing extension JS: Ctrl+Shift+P → Developer: Reload Window
+
 # Neovim
 nvim                                       # vi alias → nvim
 :Mason                                     # LSP/tool manager
@@ -185,7 +194,65 @@ uv --version
 
 ---
 
-## 5. Recreating this environment from scratch (checklist)
+## 5. Headless plotting: `show_plot.py` + `local.showplot-bg`
+
+There is no GUI/Tk display in this codespace, so plain `plt.show()` does
+nothing. `python-practicals/show_plot.py` (on branch `py-practical`) patches
+`plt.show` so scripts work unchanged:
+
+```python
+import show_plot  # noqa: F401 — patches plt.show
+# ... build plots with matplotlib.pyplot as plt ...
+plt.show()        # saves a PNG and opens it in a background VS Code tab
+```
+
+What it does, per call:
+
+- forces the `agg` backend (switching after importing `pyplot` is supported —
+  matplotlib's `use()` delegates to `switch_backend`, and non-interactive
+  switches are always possible);
+- saves to the **current working directory** as `plot.png`, `plot_2.png`,
+  `plot_3.png`, … so multiple `show()` calls don't overwrite each other, prints
+  the path, and calls `plt.close("all")` so each plot starts fresh;
+- writes the absolute path to `/tmp/show_plot_request.txt` **atomically**
+  (PID-unique temp file + `os.replace`) — a plain truncate-then-write let the
+  extension's `fs.watch` read an empty/partial file (lost plots) and fired
+  several duplicate opens per plot;
+- honours `SHOW_PLOT_OPEN=cli` (fall back to `code --goto`, which steals terminal
+  focus) and `SHOW_PLOT_DISABLE=1` (save only, never open).
+
+Import order does not matter: Python modules are singletons, so patching
+`plt.show` works even if a script imports `matplotlib.pyplot` before
+`show_plot`.
+
+### The extension is machine state, not git
+
+`local.showplot-bg` v0.0.1 is **manually installed** — it is not part of the
+repo, `post-create.sh`, or this docs branch. It lives at
+`~/.vscode-remote/extensions/local.showplot-bg-0.0.1/`; the source is
+`/tmp/showplot-bg/extension.js` and the installable package is
+`/tmp/showplot-bg.vsix` (both patched — reinstall from there, not from an old
+copy). It watches `/tmp/show_plot_request.txt` and calls:
+
+```js
+vscode.commands.executeCommand("vscode.open", vscode.Uri.file(line), {
+  preserveFocus: true,  // maximized terminal keeps focus
+  preview: false,       // pinned tabs: keep EVERY plot, not just the last
+});
+```
+
+`preview: false` is essential. The VS Code API states that "preview tabs will
+be replaced and reused until set to stay" — with `preview: true` a multi-plot
+script shows only its **last** PNG. With `preserveFocus: true` the tabs open in
+the background, so focus stays in the terminal.
+
+If the extension JS is edited, the running extension host must be reloaded:
+`Ctrl+Shift+P` → **Developer: Reload Window** (there is no CLI flag for this).
+If the extension is missing entirely, PNGs still save — they just don't open.
+
+---
+
+## 6. Recreating this environment from scratch (checklist)
 
 1. Base repo: `https://github.com/fg65hg67/uni-practicals` (the codespace
    template). Its `post-create.sh` handles mise activation, zsh plugins, base
@@ -206,12 +273,17 @@ uv --version
    after cloning the upstream repo; start Apache.
 5. Deploy Python: `git archive py-practical | tar -x -C <workspace-root>`,
    then `uv sync`.
-6. Remember to re-run `sudo service apache2 start` after any container
+6. Install the headless-plot viewer:
+   `code --install-extension /tmp/showplot-bg.vsix` (or keep the patched
+   `~/.vscode-remote/extensions/local.showplot-bg-0.0.1/` in place), then
+   **Developer: Reload Window**. Without it, plots save but never open.
+   See §5.
+7. Remember to re-run `sudo service apache2 start` after any container
    recreation (no systemd).
 
 ---
 
-## 6. References
+## 7. References
 
 - LazyVim: https://www.lazyvim.org/extras/lang/python ·
   https://www.lazyvim.org/extras/lang/java ·
@@ -221,4 +293,10 @@ uv --version
   https://www.lazyvim.org/plugins/lsp
 - mise: https://mise.jdx.dev
 - uv: https://docs.astral.sh/uv/ (mirror config: `uv.toml`)
+- matplotlib `use()` / backend switching:
+  https://matplotlib.org/stable/api/matplotlib_configuration_api.html#matplotlib.use
+- VS Code built-in commands (`vscode.open`):
+  https://code.visualstudio.com/api/references/commands ·
+  `TextDocumentShowOptions` (`preview` / `preserveFocus`):
+  https://code.visualstudio.com/api/references/vscode-api#TextDocumentShowOptions
 - Upstream practicals repo context: `README-REPO-CONTEXT.md`
