@@ -1,6 +1,6 @@
 import pandas as pd
 
-iris = pd.read_csv("Iris.csv")
+iris = pd.read_csv("../../Iris.csv")
 sample = iris.sample(10)
 print("10 random samples:\n", sample)
 
