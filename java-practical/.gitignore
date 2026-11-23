@@ -1,0 +1,10 @@
+# Compiled Java artifacts
+*.class
+*.jar
+out/
+build/
+target/
+
+# IDE files
+.idea/
+*.iml
