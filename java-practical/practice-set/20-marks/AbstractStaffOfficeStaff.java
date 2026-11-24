@@ -30,7 +30,7 @@ public class AbstractStaffOfficeStaff {
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);
 
-    System.out.print("Enter number is office staff: ");
+    System.out.print("Enter number of office staff: ");
     int n = sc.nextInt();
 
     OfficeStaff[] arr = new OfficeStaff[n];

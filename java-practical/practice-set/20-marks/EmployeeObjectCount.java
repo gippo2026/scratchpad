@@ -21,11 +21,11 @@ class Employee {
   }
 
   public static void displayCount() {
-    System.err.println("Total employee objects created: " + count);
+    System.out.println("Total employee objects created: " + count);
   }
 
   public void display() {
-    System.out.println("ID: " + id + " | Name: " + name + " | Dept: " + deptname + " | Salary: " + salary);
+    System.out.printf("ID: %d | Name: %s | Dept: %s | Salary: %.2f%n", id, name, deptname, salary);
   }
 }
 

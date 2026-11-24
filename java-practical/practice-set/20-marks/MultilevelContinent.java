@@ -27,10 +27,10 @@ class State extends Country {
   }
 
   void display() {
-    System.out.println("place      :" + place);
-    System.out.println("State      :" + state);
-    System.out.println("Country    :" + country);
-    System.out.println("Continent  :" + continent);
+    System.out.println("Place      : " + place);
+    System.out.println("State      : " + state);
+    System.out.println("Country    : " + country);
+    System.out.println("Continent  : " + continent);
   }
 }
 

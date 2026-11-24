@@ -37,8 +37,8 @@ public class OperationCylinder {
     double height = sc.nextDouble();
 
     Cylinder cy = new Cylinder(radius, height);
-    System.out.println("Area: " + cy.area());
-    System.out.println("Volume: " + cy.volume());
+    System.out.printf("Area: %.2f%n", cy.area());
+    System.out.printf("Volume: %.2f%n", cy.volume());
     sc.close();
   }
 }

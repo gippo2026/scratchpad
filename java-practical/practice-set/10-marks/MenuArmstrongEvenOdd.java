@@ -41,7 +41,7 @@ public class MenuArmstrongEvenOdd {
           if (x % 2 == 0) {
             System.out.println("The number " + x + " is even");
           } else {
-            System.out.println("The number " + x + " id odd");
+            System.out.println("The number " + x + " is odd");
           }
           break;
 
