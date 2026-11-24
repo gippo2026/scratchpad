@@ -20,11 +20,11 @@ public class MenuArmstrongEvenOdd {
         case 1:
           System.out.print("Enter a number: ");
           int n = sc.nextInt();
-          int temp = n;
-          int sum = 0;
+          int temp = Math.abs(n), sum = 0;
+          int digits = String.valueOf(temp).length();
           while (temp > 0) {
             int d = temp % 10;
-            sum = sum + d * d * d;
+            sum += (int) Math.pow(d, digits);
             temp = temp / 10;
           }
           if (sum == n) {
