@@ -3,7 +3,7 @@
 > This document explains **why** everything is where it is, so an AI agent can
 > reason about new tasks instead of replaying steps mechanically. For the exact
 > chronological steps, see `README.md`; for upstream history, see
-> `README-REPO-CONTEXT.md`.
+> `REPO-CONTEXT.md`.
 
 ---
 
@@ -44,15 +44,22 @@ main                  (generic baseline — DO NOT COMMIT TO THIS)
 │                       .devcontainer/devcontainer.json
 │                       .devcontainer/post-create.sh
 │
-├── env-setup-log     (agent context — documentation only)
-│                       README.md                 ← start here
-│                       README-MENTAL-MODEL.md    ← this file
-│                       README-REPO-CONTEXT.md
-│                       README-PYTHON-PRACTICALS.md
+├── env-setup-log     (agent context — documentation only, split by purpose)
+│                       README.md           ← start here (index)
+│                       MENTAL-MODEL.md     ← design/why (this file)
+│                       SETUP.md            ← steps/state/commands
+│                       PYTHON.md           ← headless plots + exam introspection
+│                       JAVA.md             ← Java branch + jdtls classpath
+│                       REPO-CONTEXT.md     ← upstream history
+│                       PYTHON-PROJECT-README.md  ← preserved verbatim
 │
-├── py-practical      (Python coursework)
-│                       assignment1/, assignment2/, pyproject.toml,
+├── py-practical      (Python coursework → python-practicals/)
+│                       assignment1/ … assignment4/, pyproject.toml,
 │                       uv.lock, uv.toml, show_plot.py, data, DEV_ENV.md
+│
+├── java-practical    (Java coursework → java-practical/)
+│                       practice-set/10-marks/, practice-set/20-marks/,
+│                       generate_classpath.py, root .project + .classpath
 │
 └── html-practicals   (PHP/HTML/CSS coursework)
                         assignment1/ … assignment4/, composer.json,
@@ -66,10 +73,14 @@ checked out without dragging the others along.
 ### Routing rule for any new file
 
 1. Is it generic devcontainer/tooling config for *every* codespace? → `main`.
-2. Is it documentation/context for the agent? → `env-setup-log` (README files only).
-3. Is it Python coursework? → `py-practical`.
-4. Is it PHP/HTML/CSS coursework? → `html-practicals`.
-5. Is it machine state (venv, caches, installed tools, `/var/www/html`)? → **not in git**.
+2. Is it documentation/context for the agent? → `env-setup-log` (`.md` files only;
+   put it in the existing topic file, or add a new focused file and link it from `README.md` —
+   don't keep growing one giant README).
+3. Is it Python coursework? → `py-practical` → `python-practicals/`.
+4. Is it Java coursework? → `java-practical` → `java-practical/`.
+5. Is it PHP/HTML/CSS coursework? → `html-practicals`.
+6. Is it machine state (venv, caches, installed tools, Neovim autocmds,
+   `/var/www/html`, generated `bin/`)? → **not in git**.
 
 ---
 
@@ -102,7 +113,7 @@ committed to `main` (by design — `main` must stay generic).
 - **Why is PHP served from `/var/www/html`, not the repo?** Apache's docroot is
   `/var/www/html`. The repo is a git workspace under `/workspaces`, not a web
   root. The upstream repo even has commits that first symlinked, then decided
-  to serve files directly from the docroot — see `README-REPO-CONTEXT.md`.
+  to serve files directly from the docroot — see `REPO-CONTEXT.md`.
 - **Why is the Python project in its own `python-practicals/` folder?** It keeps
   the Python tooling (`pyproject.toml`, `uv.lock`, `.venv`, `pyright`/`ruff`
   config, `import show_plot`) self-contained and separate from the generic repo
@@ -122,7 +133,7 @@ committed to `main` (by design — `main` must stay generic).
   manual `local.showplot-bg` extension opens PNGs with `preserveFocus: true`
   (background) and `preview: false` (pinned, so every plot of a multi-plot
   script stays in a tab). It is machine state like `.venv` — never in git; see
-  `README.md` §5.
+  `PYTHON.md`.
 
 ---
 
@@ -130,7 +141,9 @@ committed to `main` (by design — `main` must stay generic).
 
 1. **Never commit to `main`** unless it is a genuinely generic template change
    the user asked for. Keep its two-file tree intact.
-2. **Keep `env-setup-log` README-only.** Don't mix practical files into it.
+2. **Keep `env-setup-log` documentation-only** (`.md` files only). Don't mix
+   practical files into it, and keep each file focused — add a new topic file
+   rather than growing one README indefinitely.
 3. **Don't confuse source with deployment.** Changing `html-practicals` requires
    re-deploying to `/var/www/html`; changing `py-practical` requires `uv sync`
    only if dependencies changed.
@@ -159,12 +172,18 @@ committed to `main` (by design — `main` must stay generic).
     the terminal keeps focus. After editing extension JS, reload the VS Code
     window; the extension/source/VSIX are machine state in `~` and `/tmp`,
     never committed.
+12. **Java classpath is generated, never hand-edited.** `java-practical/generate_classpath.py`
+    derives source roots from `package` declarations; the nvim `BufWritePost`
+    autocmd in `~/.config/nvim/lua/config/autocmds.lua` regenerates root
+    `.classpath` and restarts jdtls only when it changed. `.project`/`.classpath`
+    are tracked only on `java-practical`; the autocmd is machine state (not git).
 
 ---
 
 ## 7. How to approach a new task
 
-1. Read `README.md` (steps/state) and this file (design).
+1. Read `README.md` (index), then this file (design) and the topic file you need
+   (`SETUP.md`, `PYTHON.md`, `JAVA.md`).
 2. Identify which **plane** the task touches: git branch, machine state, or
    deployment.
 3. Pick the **branch** using the routing rule in §3; never default to `main`.
@@ -186,6 +205,10 @@ committed to `main` (by design — `main` must stay generic).
 | Blank PHP page | Check GET params / Apache error log; PHP itself works |
 | `python` resolves to 3.13 but not venv packages | Use `uv run python ...` (or select `.venv` via venv-selector in nvim) |
 | New codespace lacks the setup log | It was created from `main`; use `env-setup-log` instead |
-| Only the last plot appears for a multi-plot script | Extension uses `preview: true`; set `preview: false` + reload window (§5 of `README.md`) |
+| Java file "not on the classpath of the project java-practicals" | Its folder is not a source root — run `:JavaClasspath` to regenerate `.classpath` |
+| "declared package … does not match expected package …" | Folder path doesn't match `package X;` — generator derives roots from package declarations; restart jdtls |
+| Duplicate/overlapping Java source roots | Parent source entry needs `excluding="<child>/**"` — generator adds this automatically |
+| Python folder missing after switching branches | It lives on `py-practical` only; `.venv` stays on disk, checkout restores it |
+| Only the last plot appears for a multi-plot script | Extension uses `preview: true`; set `preview: false` + reload window (see `PYTHON.md`) |
 | Plots save but no tab opens | `local.showplot-bg` missing/not loaded — reinstall from `/tmp/showplot-bg.vsix` and reload window |
 | Some plots missing on rapid `plt.show()` calls | Request file written non-atomically; use temp file + `os.replace` in `show_plot.py` |
