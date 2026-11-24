@@ -11,7 +11,7 @@ public class NameFormat {
 
     String mid = "";
     if (middle.length() > 0) {
-      mid = Character.toUpperCase(middle.charAt(0)) + middle.substring(1).toLowerCase();
+      mid = middle.substring(0, 1).toUpperCase() + middle.substring(1).toLowerCase();
     }
     System.out.println(last + ", " + first + " " + mid);
     scanner.close();
