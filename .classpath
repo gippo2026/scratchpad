@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="java-practical/practice-set/10-marks"/>
+	<classpathentry kind="src" path="java-practical/practice-set/20-marks" excluding="MyMathPackage/**,AdvMathPackage/**"/>
 	<classpathentry kind="src" path="java-practical/practice-set/20-marks/MyMathPackage"/>
 	<classpathentry kind="src" path="java-practical/practice-set/20-marks/AdvMathPackage"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
