@@ -2,5 +2,5 @@
 # The Python venv/caches stay on disk for the py-practical branch; hide them here.
 python-practicals/
 
-# jdtls / Eclipse build output (from .classpath)
-bin/
+# jdtls / Eclipse build output (from .classpath) — hidden folder
+.bin/

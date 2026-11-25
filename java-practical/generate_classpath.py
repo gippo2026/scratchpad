@@ -55,7 +55,7 @@ def main() -> None:
             "<classpath>",
             *entries,
             '\t<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>',
-            '\t<classpathentry kind="output" path="bin"/>',
+            '\t<classpathentry kind="output" path=".bin"/>',
             "</classpath>",
             "",
         ]
