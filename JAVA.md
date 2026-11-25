@@ -14,7 +14,8 @@ java-practical/
 ├── practice-set/
 │   ├── 10-marks/                  # standalone .java files, no packages
 │   └── 20-marks/
-│       ├── *.java                 # standalone (abstract/inheritance/interface)
+│       ├── .standalone/           # hidden folder: standalone no-package files
+│       │                          # (abstract/inheritance/interface), source root
 │       ├── MyMathPackage/
 │       │   ├── MyMath/ArithOp.java      # package MyMath;
 │       │   └── TestArithOp.java         # default package, imports MyMath.ArithOp
@@ -46,10 +47,12 @@ its folder path matches its `package` declaration. Symptoms:
 - *"The declared package 'MyMath' does not match the expected package …"*
   → folder path did not match `package MyMath;`.
 
-`.classpath` therefore declares one source root per folder: `10-marks`,
-`20-marks`, `20-marks/MyMathPackage`, `20-marks/AdvMathPackage`. Because
-`20-marks` contains the two package roots, it carries
-`excluding="MyMathPackage/**,AdvMathPackage/**"` so no file is seen twice.
+`.classpath` declares **one source root per folder**: `10-marks`,
+`20-marks/.standalone` (hidden), `20-marks/MyMathPackage`,
+`20-marks/AdvMathPackage`. Do **not** make `20-marks` itself a source root:
+overlapping/nested roots made jdtls expect package `AdvMathPackage` for the
+default-package test files (red *"declared package \"\" does not match expected
+package AdvMathPackage"*). Sibling roots need no `excluding` attribute.
 `org.eclipse.jdt.launching.JRE_CONTAINER` supplies the JDK and `bin/` is output.
 
 ## Dynamic generation (do not hand-edit `.classpath`)
