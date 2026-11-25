@@ -15,10 +15,12 @@ java-practical/
 │   ├── 10-marks/                  # standalone .java files, no packages
 │   └── 20-marks/                  # ALL 20-mark solutions live here
 │       ├── *.java                 # standalone (abstract/inheritance/interface)
-│       ├── MyMath/ArithOp.java         # package MyMath; folder matches package
-│       ├── TestArithOp.java            # default package, imports MyMath.ArithOp
-│       ├── AdvMath/NumericOp.java      # package AdvMath; folder matches package
-│       └── TestNumericOp.java
+│       ├── MyMath/                     # package MyMath; folder matches package
+│       │   ├── ArithOp.java
+│       │   └── TestArithOp.java        # package MyMath (no import needed)
+│       └── AdvMath/                    # package AdvMath; folder matches package
+│           ├── NumericOp.java
+│           └── TestNumericOp.java      # package AdvMath
 ```
 
 At the repo root, **only on this branch**: `.project` (Eclipse/JDT project
@@ -29,9 +31,12 @@ while on this branch) and `.bin/` (hidden jdtls build output).
 Compile/run is plain JDK — no Maven/Gradle:
 
 ```bash
-cd java-practical/practice-set/20-marks
-javac -Xlint:all *.java
-java -cp . OperationCylinder
+cd java-practical/practice-set
+javac -Xlint:all -d .bin -sourcepath 20-marks:10-marks \
+  10-marks/*.java 20-marks/*.java 20-marks/MyMath/*.java 20-marks/AdvMath/*.java
+java -cp .bin OperationCylinder
+java -cp .bin MyMath.TestArithOp      # now inside the package
+java -cp .bin AdvMath.TestNumericOp
 ```
 
 ## jdtls needs a matching source root
