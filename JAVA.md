@@ -14,13 +14,14 @@ java-practical/
 ├── practice-set/
 │   ├── 10-marks/                  # standalone .java files, no packages
 │   └── 20-marks/                  # ALL 20-mark solutions live here
-│       ├── *.java                 # standalone (abstract/inheritance/interface)
-│       ├── MyMath/                     # package MyMath; folder matches package
-│       │   ├── ArithOp.java
-│       │   └── TestArithOp.java        # package MyMath (no import needed)
-│       └── AdvMath/                    # package AdvMath; folder matches package
-│           ├── NumericOp.java
-│           └── TestNumericOp.java      # package AdvMath
+│       ├── general/               # visible source root: standalone no-package
+│       │   └── *.java             # (abstract/inheritance/interface, etc.)
+│       ├── MyMathPackage/         # its own source root
+│       │   ├── MyMath/ArithOp.java      # package MyMath; folder matches
+│       │   └── TestArithOp.java         # default package, imports MyMath.ArithOp
+│       └── AdvMathPackage/        # its own source root
+│           ├── AdvMath/NumericOp.java   # package AdvMath; folder matches
+│           └── TestNumericOp.java       # default package, imports AdvMath.NumericOp
 ```
 
 At the repo root, **only on this branch**: `.project` (Eclipse/JDT project
@@ -32,11 +33,14 @@ Compile/run is plain JDK — no Maven/Gradle:
 
 ```bash
 cd java-practical/practice-set
-javac -Xlint:all -d .bin -sourcepath 20-marks:10-marks \
-  10-marks/*.java 20-marks/*.java 20-marks/MyMath/*.java 20-marks/AdvMath/*.java
+javac -Xlint:all -d .bin \
+  -sourcepath 10-marks:20-marks/general:20-marks/MyMathPackage:20-marks/AdvMathPackage \
+  10-marks/*.java 20-marks/general/*.java \
+  20-marks/MyMathPackage/MyMath/*.java 20-marks/MyMathPackage/TestArithOp.java \
+  20-marks/AdvMathPackage/AdvMath/*.java 20-marks/AdvMathPackage/TestNumericOp.java
 java -cp .bin OperationCylinder
-java -cp .bin MyMath.TestArithOp      # now inside the package
-java -cp .bin AdvMath.TestNumericOp
+java -cp .bin TestArithOp
+java -cp .bin TestNumericOp
 ```
 
 ## jdtls needs a matching source root
@@ -49,14 +53,13 @@ its folder path matches its `package` declaration. Symptoms:
 - *"The declared package 'MyMath' does not match the expected package …"*
   → folder path did not match `package MyMath;`.
 
-`.classpath` declares just **two source roots**: `10-marks` and `20-marks`.
-Every 20-mark file is directly under `20-marks`, and package files sit in
-`MyMath/` and `AdvMath/` folders whose names **exactly match** their `package`
-declarations — so a single source root is enough. The earlier red *"declared
-package \"\" does not match expected package AdvMathPackage"* came from extra
-`MyMathPackage`/`AdvMathPackage` wrapper folders plus overlapping source roots;
-those wrappers are gone. The generated build output folder is hidden `.bin/`.
-`org.eclipse.jdt.launching.JRE_CONTAINER` supplies the JDK and `bin/` is output.
+`.classpath` declares **four non-overlapping source roots**: `10-marks`,
+`20-marks/general`, `20-marks/MyMathPackage`, `20-marks/AdvMathPackage`.
+Everything for 20-marks stays under `20-marks/`. `20-marks` itself is **not**
+a source root — that is the only way to keep the `*Package/` wrapper folders
+nested there without jdtls expecting package `AdvMathPackage` for the
+default-package test files. The hidden generated build output is `.bin/`.
+`org.eclipse.jdt.launching.JRE_CONTAINER` supplies the JDK.
 
 ## Dynamic generation (do not hand-edit `.classpath`)
 
