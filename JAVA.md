@@ -13,21 +13,18 @@ java-practical/
 ├── generate_classpath.py          # generates the repo-root .classpath
 ├── practice-set/
 │   ├── 10-marks/                  # standalone .java files, no packages
-│   └── 20-marks/
-│       ├── .standalone/           # hidden folder: standalone no-package files
-│       │                          # (abstract/inheritance/interface), source root
-│       ├── MyMathPackage/
-│       │   ├── MyMath/ArithOp.java      # package MyMath;
-│       │   └── TestArithOp.java         # default package, imports MyMath.ArithOp
-│       └── AdvMathPackage/
-│           ├── AdvMath/NumericOp.java   # package AdvMath;
-│           └── TestNumericOp.java
+│   └── 20-marks/                  # ALL 20-mark solutions live here
+│       ├── *.java                 # standalone (abstract/inheritance/interface)
+│       ├── MyMath/ArithOp.java         # package MyMath; folder matches package
+│       ├── TestArithOp.java            # default package, imports MyMath.ArithOp
+│       ├── AdvMath/NumericOp.java      # package AdvMath; folder matches package
+│       └── TestNumericOp.java
 ```
 
 At the repo root, **only on this branch**: `.project` (Eclipse/JDT project
 marker), `.classpath` (generated), and a root `.gitignore` that ignores
 `python-practicals/` (the 388 MB Python `.venv` stays on disk but is hidden
-while on this branch) and `bin/` (jdtls build output).
+while on this branch) and `.bin/` (hidden jdtls build output).
 
 Compile/run is plain JDK — no Maven/Gradle:
 
@@ -47,12 +44,13 @@ its folder path matches its `package` declaration. Symptoms:
 - *"The declared package 'MyMath' does not match the expected package …"*
   → folder path did not match `package MyMath;`.
 
-`.classpath` declares **one source root per folder**: `10-marks`,
-`20-marks/.standalone` (hidden), `20-marks/MyMathPackage`,
-`20-marks/AdvMathPackage`. Do **not** make `20-marks` itself a source root:
-overlapping/nested roots made jdtls expect package `AdvMathPackage` for the
-default-package test files (red *"declared package \"\" does not match expected
-package AdvMathPackage"*). Sibling roots need no `excluding` attribute.
+`.classpath` declares just **two source roots**: `10-marks` and `20-marks`.
+Every 20-mark file is directly under `20-marks`, and package files sit in
+`MyMath/` and `AdvMath/` folders whose names **exactly match** their `package`
+declarations — so a single source root is enough. The earlier red *"declared
+package \"\" does not match expected package AdvMathPackage"* came from extra
+`MyMathPackage`/`AdvMathPackage` wrapper folders plus overlapping source roots;
+those wrappers are gone. The generated build output folder is hidden `.bin/`.
 `org.eclipse.jdt.launching.JRE_CONTAINER` supplies the JDK and `bin/` is output.
 
 ## Dynamic generation (do not hand-edit `.classpath`)
