@@ -1,4 +1,4 @@
-package AdvMath;
+import AdvMath.NumericOp;
 
 public class TestNumericOp {
   public static void main(String[] args) {

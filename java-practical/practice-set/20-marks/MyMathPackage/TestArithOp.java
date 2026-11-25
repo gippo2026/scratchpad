@@ -1,4 +1,4 @@
-package MyMath;
+import MyMath.ArithOp;
 
 public class TestArithOp {
   public static void main(String[] args) {
